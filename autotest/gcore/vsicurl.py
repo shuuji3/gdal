@@ -515,14 +515,15 @@ def test_vsicurl_test_range_retry():
     handler = webserver.SequentialHandler()
     handler.add('GET', '/test_range_retry/', 404)
     handler.add('HEAD', '/test_range_retry/test.txt', 200, {'Content-Length': '6'})
-    handler.add('GET', '/test_range_retry/test.txt', 502, {'Content-Range': 'bytes 3-5/6'})
-    handler.add('GET', '/test_range_retry/test.txt', 429, {'Content-Range': 'bytes 3-5/6'})
-    handler.add('GET', '/test_range_retry/test.txt', 200, {'Content-Range': 'bytes 3-5/6'}, 'bar')
+    handler.add('GET', '/test_range_retry/test.txt', 502, {'Range': 'bytes 3-5/6'})
+    handler.add('GET', '/test_range_retry/test.txt', 429, {'Range': 'bytes 3-5/6'})
+    handler.add('GET', '/test_range_retry/test.txt', 200, {'Range': 'bytes 3-5/6'}, 'bar')
     with webserver.install_http_handler(handler):
         f = gdal.VSIFOpenL('/vsicurl?max_retry=2&retry_delay=0.01&url=http://localhost:%d/test_range_retry/test.txt' % gdaltest.webserver_port, 'rb')
         assert f is not None
         gdal.ErrorReset()
         with gdaltest.error_handler():
+            gdal.VSIFSeekL(f, 3, 0)
             data = gdal.VSIFReadL(1, 3, f).decode('ascii')
         error_msg = gdal.GetLastErrorMsg()
         gdal.VSIFCloseL(f)
