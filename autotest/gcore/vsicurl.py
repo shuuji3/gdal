@@ -527,8 +527,9 @@ def test_vsicurl_test_range_retry():
             data = gdal.VSIFReadL(1, 3, f).decode('ascii')
         error_msg = gdal.GetLastErrorMsg()
         gdal.VSIFCloseL(f)
-        assert data == 'bar'
         assert '429' in error_msg
+        assert data == 'bar'
+
 
         
 ###############################################################################
