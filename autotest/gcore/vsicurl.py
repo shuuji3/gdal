@@ -515,9 +515,9 @@ def test_vsicurl_test_range_retry():
     handler = webserver.SequentialHandler()
     handler.add('GET', '/test_range_retry/', 404)
     handler.add('HEAD', '/test_range_retry/test.txt', 200, {'Content-Length': '6'})
-    handler.add('GET', '/test_range_retry/test.txt', 502, {'Range': 'bytes 3-5/6'})
-    handler.add('GET', '/test_range_retry/test.txt', 429, {'Range': 'bytes 3-5/6'})
-    handler.add('GET', '/test_range_retry/test.txt', 200, {'Range': 'bytes 3-5/6'}, 'bar')
+    handler.add('GET', '/test_range_retry/test.txt', 502, expected_headers={'Range': 'bytes 3-5/6'})
+    handler.add('GET', '/test_range_retry/test.txt', 429, expected_headers={'Range': 'bytes 3-5/6'})
+    handler.add('GET', '/test_range_retry/test.txt', 200, body='bar', expected_headers={'Range': 'bytes 3-5/6'})
     with webserver.install_http_handler(handler):
         f = gdal.VSIFOpenL('/vsicurl?max_retry=2&retry_delay=0.01&url=http://localhost:%d/test_range_retry/test.txt' % gdaltest.webserver_port, 'rb')
         assert f is not None
